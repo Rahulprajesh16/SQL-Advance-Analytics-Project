@@ -1,3 +1,3 @@
 # SQL-Advanced-Analytics Project
 
-this project based on 
+This SQL project based on end-to-end retail data give business insights,data distribution ,customer patterns and product performance
