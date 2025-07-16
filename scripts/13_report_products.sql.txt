@@ -1,0 +1,90 @@
+/*
+                              ---Product Report---
+
+Purpose:
+    - This report consolidates key product metrics and behaviors.
+
+Highlights:
+    1. Gathers essential fields such as product name, category, subcategory, and cost.
+    2. Segments products by revenue to identify High-Performers, Mid-Range, or Low-Performers.
+    3. Aggregates product-level metrics:
+       - total orders
+       - total sales
+       - total quantity sold
+       - total customers (unique)
+       - lifespan (in months)
+    4. Calculates valuable KPIs:
+       - recency (months since last sale)
+       - average order revenue (AOR)
+       - average monthly revenue           */
+
+CREATE VIEW gold.report_products
+AS
+with base_query as(
+select
+f.order_number,
+f.order_date,
+f.customer_key,
+f.sales_amount,
+f.quantity,
+p.product_key,
+p.product_name,
+p.category,
+p.subcategory,
+p.cost
+from gold.fact_sales f
+left join gold.dim_products p
+on f.product_key=p.product_key
+where order_date is not null
+),
+product_aggregation as 
+(
+select
+product_key,
+product_name,
+category,
+subcategory,
+cost,
+datediff(month,min(order_date),max(order_date)) as Life_span,
+max(order_date) as last_sale_date,
+count(distinct order_number) as Total_orders,
+count(distinct customer_key) as Total_customers,
+sum(sales_amount) as Total_sales,
+sum(quantity) as Total_quantity,
+round(avg(cast(sales_amount as float)/nullif(quantity,0)),1) as Avg_selling_price
+from base_query
+group by product_key,
+product_name,
+category,
+subcategory,
+cost)
+select 
+product_key,
+product_name,
+category,
+subcategory,
+cost,
+Life_span,
+last_sale_date,
+datediff(month,last_sale_date,getdate()) as Recency_in_months,
+case 
+    when Total_sales>5000 then'High Performance'
+	when Total_sales>=1000 then 'Mid -Range'
+	else 'low-performnce'
+end Product_segment,
+Total_orders,
+Total_customers,
+Total_sales,
+Total_quantity,
+Avg_selling_price,
+case
+   when Total_orders=0 then 0
+   else Total_sales/Total_orders
+end as Avg_order_revenue,
+case
+   when Life_span=0 then Total_sales
+   else Total_sales/Life_span
+end as Avg_monthly_revenue
+from product_aggregation
+
+SELECT * FROM GOLD.report_products

@@ -1,0 +1,74 @@
+
+/*
+
+                                      ---Data Segmentation---
+
+--Group data based on a specific range.
+--Understand the correlation between two measures.
+
+
+SQL Functions Used:
+    - CASE: Defines custom segmentation logic.
+    - GROUP BY: Groups data into segments.
+*/
+
+--Segment products into cost ranges and count products comes under in each category
+
+with product_segments as
+(
+Select
+product_key,
+product_name,
+cost,
+case
+     when cost<100 then 'Below 100'
+	 when cost between 100 and 500 then '100-500'
+	 when cost between 500 and 1000 then '500-1000'
+	 else 'Above 1000' 
+end Cost_range
+from gold.dim_products
+)
+select
+Cost_range,
+count(product_key) as Total_products
+from product_segments
+group by Cost_range
+order by Total_products desc
+
+/*Group customers into three segments based on their spending behavior:
+	- VIP: Customers with at least 12 months of history and spending more than €5,000.
+	- Regular: Customers with at least 12 months of history but spending €5,000 or less.
+	- New: Customers with a lifespan less than 12 months.
+And find the total number of customers by each group
+*/
+
+with customer_segmentation as
+(
+select
+c.customer_key as customer_key,
+sum(s.sales_amount) Total_spending,
+min(s.order_date) as  First_order,
+max(s.order_date) as Last_order,
+datediff(month,min(s.order_date),max(s.order_date)) as Life_span
+from gold.fact_sales s
+left join gold.dim_customers c
+on s.customer_key=c.customer_key
+group by (c.customer_key)
+)
+
+select
+Customer_segments,
+count(Customer_segments) count_of_customers
+
+from
+(
+select
+customer_key,
+case 
+     when Life_span>=12 and  Total_spending >5000 then 'VIP'
+	 WHEN Life_span>=12 and  Total_spending <=5000 then 'Regular'
+	 else 'New'
+end Customer_segments
+from customer_segmentation)t
+group by (Customer_segments)
+order by count_of_customers desc

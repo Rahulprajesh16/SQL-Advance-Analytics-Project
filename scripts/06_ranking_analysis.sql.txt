@@ -1,0 +1,79 @@
+
+                    --- Ranking Analysis--
+
+/*--Purpose:
+    - To rank items (e.g., products, customers) based on performance or other metrics.
+    - To identify top performers or laggards.
+
+SQL Functions Used:
+    - Window Ranking Functions: RANK(), DENSE_RANK(), ROW_NUMBER(), TOP
+    - Clauses: GROUP BY, ORDER BY
+*/
+
+--which 5 products generate the highest revenue?
+
+select TOP 5
+p.product_name,
+sum(f.sales_amount) as Total_revenue
+from gold.fact_sales as f
+left join gold.dim_products as p
+on f.product_key=p.product_key
+group by p.product_name
+order by Total_revenue desc
+
+--Which are the 5 worst -performing products in terms of sales?
+
+select TOP 5
+p.product_name,
+sum(f.sales_amount) as Total_revenue
+from gold.fact_sales as f
+left join gold.dim_products as p
+on f.product_key=p.product_key
+group by p.product_name
+order by Total_revenue 
+
+--Find the top 10 customers who have gnenerated the highest revenue
+
+select
+*
+from
+(select 
+c.customer_key,
+sum(f.sales_amount) as Total_sales,
+Row_number() OVER (ORDER BY sum(f.sales_amount) desc ) Ranking
+from gold.dim_customers as c
+left join gold.fact_sales as f
+on c.customer_key=f.customer_key
+group by c.customer_key)t
+where Ranking<=10
+
+--The 3 customers with fewest orders placed
+select top 3
+c.customer_key,
+c.first_name,
+c.last_name,
+count(distinct order_number) No_oforders
+from gold.dim_customers as c
+left join gold.fact_sales as f
+on c.customer_key=f.customer_key
+group by c.customer_key,c.first_name,c.last_name
+order by No_oforders
+
+
+select*
+from
+(
+select  
+c.customer_key,
+c.first_name,
+c.last_name,
+count(distinct order_number) No_oforders,
+row_number() over (order by count(distinct order_number)) ranking
+from gold.dim_customers as c
+left join gold.fact_sales as f
+on c.customer_key=f.customer_key
+group by c.customer_key,c.first_name,c.last_name
+
+)t
+where ranking<=3
+

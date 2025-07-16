@@ -1,0 +1,30 @@
+
+                    ----Date Exploration----
+
+/* Identify the earliest and latest dates (boundaries).
+   Understand the scope of data and the timespan.
+
+  Sql Functions used 
+  MIN(), MAX(), DATEDIFF() 
+  */
+ 
+
+ ---Find the date of the first and last order from the Table gold.fact_sales
+ ---How many (years,months,days) of sales are available between first and last order
+ select 
+ min(order_date ) First_Order_date,
+ max(order_date) Last_order_date,
+ datediff(year, min(order_date ), max(order_date)) Order_range_years,
+ datediff(MONTH, min(order_date ), max(order_date)) Order_range_months,
+ datediff(DAY, min(order_date ), max(order_date)) Order_range_days
+ from gold.fact_sales
+
+--- Find the youngest and oldest customer from the Table gold.dim_customers
+
+select
+max(birthdate) as Young_customer,
+datediff(year,max(birthdate),getdate())as Young_customer_age,
+min(birthdate) as Old_customer,
+DATEDIFF(year,min(birthdate),getdate()) as Old_customer_age
+from gold.dim_customers
+

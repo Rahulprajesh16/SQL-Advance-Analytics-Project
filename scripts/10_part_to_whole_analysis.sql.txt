@@ -1,0 +1,57 @@
+
+/*
+                                          --Part to Whole analysis-- (Proportional Analysis)
+
+--Analyse how an individual part is performing compared to the overall.
+--To understand which category has the greatest impact on the business
+
+
+
+SQL Functions Used:
+    - SUM(), AVG(): Aggregates values for comparison.
+    - Window Functions: SUM() OVER() for total calculations.
+
+*/
+
+
+--Which categories contribute the most overall sales
+
+with category_sales as
+(
+select
+category,
+sum(sales_amount) Total_sales
+from gold.fact_sales s
+left join gold.dim_products p
+on s.product_key=p.product_key
+group by p.category
+)
+
+select
+category,
+total_sales,
+sum(total_sales)over() overall_sales,
+concat (round ((cast (total_sales as float)/sum(total_sales)over() )*100,2),'%') as Percentage_of_sales
+from category_sales
+order by Percentage_of_sales desc
+
+--Which product contribute the most overall sales
+
+with product_sales as
+(
+select
+product_name,
+sum(sales_amount) Total_sales
+from gold.fact_sales s
+left join gold.dim_products p
+on s.product_key=p.product_key
+group by product_name
+)
+
+select
+product_name,
+Total_sales,
+sum(total_sales)over() overall_sales,
+concat (round ((cast (total_sales as float)/sum(total_sales)over() )*100,2),'%') as Percentage_of_sales
+from product_sales
+order by Percentage_of_sales desc

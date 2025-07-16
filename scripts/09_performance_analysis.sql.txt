@@ -1,0 +1,56 @@
+
+/*
+                            ----Performance Analaysis-------
+
+                 -----Comparing the current value to a target value
+                ----------Helps measure successs and compare performance 
+				   ----YoY and Mom Anlysis                  
+
+                        Current(Measure)- Target(measure)
+
+----SQL Functions Used:
+  LAG(): Accesses data from previous rows.
+  AVG() OVER(): Computes average values within partitions.
+ CASE: Defines conditional logic for trend analysis.----
+
+*/
+
+--Analyse the yearly performance of products by comparing each product's sales to both its average sales performance and the previous year's sales.
+
+With Yearly_product_sales as 
+(select
+year(f.order_date) order_year,
+p.product_name,
+sum(f.sales_amount) as current_sales,
+COUNT(f.sales_amount)Count_of_sales,
+avg(f.sales_amount)  Year_wiseProduct_average
+from gold.fact_sales f
+left join gold.dim_products p
+on f.product_key=p.product_key
+where f.order_date is not null
+group by
+year(f.order_date),p.product_name
+)
+select
+order_year,
+product_name,
+current_sales,
+Count_of_sales,
+Year_wiseProduct_average,
+avg(current_sales) over(partition by product_name ) Product_wise_avg,
+current_sales-avg(current_sales) over(partition by product_name ) as Diff_avg,
+case 
+     when current_sales-avg(current_sales) over(partition by product_name ) >0 then 'Above Average'
+	 when current_sales-avg(current_sales) over(partition by product_name ) <0 then 'Below Average'
+	 else 'Average'
+end Avg_change,
+lag(current_sales) over (partition by product_name order by order_year) Previous_sales,
+current_sales-lag(current_sales) over (partition by product_name order by order_year) Diff_Py_sales,
+case 
+     when current_sales-lag(current_sales) over (partition by product_name order by order_year)>0 then 'Increasing'
+	 when current_sales-lag(current_sales) over (partition by product_name order by order_year)<0 then 'Decreasing'
+	 else 'No change' end as Change_In_sales
+
+from Yearly_product_sales
+
+

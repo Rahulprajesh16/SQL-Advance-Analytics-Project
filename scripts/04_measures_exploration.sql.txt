@@ -1,0 +1,110 @@
+
+/* ---Measures Exploration---
+ 
+  --caluclate the key metric of the business (Big Numbers)
+  --- Highest Level of aggregation / Lowest Level of Details
+
+  -SQL Functions used
+            -SUM()
+			-AVG()
+			
+*/ select * from gold.fact_sales;
+
+--Find the Total sales
+
+Select sum(sales_amount) as Total_sales
+from gold.fact_sales
+
+--Find how many items are sold
+
+Select sum(quantity) as Total_quantity
+from gold.fact_sales
+
+--Find the average selling price
+
+ select avg(price) Avg_sellingprice
+ from gold.fact_sales
+
+--Find the total number of orders
+
+ select count(order_Number) Total_orders
+ from gold.fact_sales
+
+--Find the total number of distinct orders (no duplicate orders)
+
+ select count (distinct order_number) Unique_total_orders
+ from gold.fact_sales
+
+--Find the total number of products
+
+select count(product_name) Total_products
+from gold.dim_products
+
+--Find the total number of distinct products (no duplicate products)
+
+select count(distinct product_id) Total_unique_products
+from gold.dim_products
+
+--Find the total number of customers
+
+select count(customer_key) Total_customers
+from gold.dim_customers
+
+--Find the total number of  distinct customers (no duplicate customers)
+
+select count(distinct customer_key) Total_unique_customers
+from gold.dim_customers
+
+--Find the total number of customers that placed and order
+
+select count(distinct customer_key) As Customers_with_orders
+from gold.fact_sales
+
+
+--Alternative way
+select count(distinct customer_id) as Customerwith_orders
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key=c.customer_key
+
+--Genearte a report that shows all 'Key metrics' of the business
+
+Select 
+'Total sales' as Measure_name,
+sum(sales_amount) as Measure_value
+from gold.fact_sales
+UNION ALL
+select
+'Total quantity sold',
+ sum(quantity) 
+from gold.fact_sales
+union all
+select
+'Average selling price',
+ avg(price) Avg_sellingprice
+from gold.fact_sales
+union all
+select 
+'Total no of orders',
+count(order_Number) Total_orders
+from gold.fact_sales
+union all
+select 
+'Distinct Total orders',
+count (distinct order_number) Unique_total_orders
+ from gold.fact_sales
+union all
+select 
+'Total no of products',
+count(product_name) Total_products
+from gold.dim_products
+union all
+select
+'Total no of customers',
+count(customer_key) Total_customers
+from gold.dim_customers
+union all
+select
+'No of Customers with orders ',
+count(distinct customer_key) As Customers_with_orders
+from gold.fact_sales
