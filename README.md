@@ -15,13 +15,12 @@ This project explores multiple dimesions of the dataset to answer business quest
 1. # Database&Table setup
 2. # Data Exploration
 3. # Business Metrics
-   -Identification of unique countries,categories and subcategories
-   -Time range of orders and customer age distribution
+   -Identification of unique countries,categories and subcategoriesTime range of orders and customer age distribution
 4. # Magnitude Analysis
    -Count of customers by category,country and gender
    -Product distribution and category wise revenue
    -Customer wise total sales
-5. # RAnking Analysis
+5. # Ranking Analysis
    -Top and bottom analysis
 6. # Time trend Analysis
    -YoY and Mom analysis
@@ -36,6 +35,6 @@ This project explores multiple dimesions of the dataset to answer business quest
 
 # Functions & Tools used
    Aggergate Functions---Sum(),Avg(),Count() ...
-   window aggregate functions
+   window aggregate functions,
    Window ranking functions-Row_number(),Rank(),Dense_Rank()
    Window analytical functions-Lag(),Lead(),First_value()
